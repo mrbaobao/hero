@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+
+  ### Hero services
+
+  # PM
+  pm:
+    image: "mrbaobao/hero_pm:latest"
+    restart: always
+    env_file:
+      - .env
+
+  # HERO
+  hero:
+    image: "mrbaobao/hero_hero:latest"
+    restart: always
+    env_file:
+      - .env
+
+  #REDIS
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - ./configs/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./.data/redis:/data
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+
+  #postgres
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./.data/pg:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hero
+      - POSTGRES_PASSWORD=pgpwd
+  # NGINX
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf
+networks:
+  default:
+    name: network_hero
+    driver: bridge
